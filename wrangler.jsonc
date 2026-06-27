@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "copenhagen",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-03-25",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".open-next/assets"
+  },
+  "observability": {
+    "enabled": true
+  }
+  // バインディング例（必要に応じてコメント解除）:
+  // "kv_namespaces": [{ "binding": "MY_KV", "id": "<KV_ID>" }],
+  // "d1_databases": [{ "binding": "DB", "database_name": "copenhagen", "database_id": "<D1_ID>" }],
+  // "r2_buckets": [{ "binding": "BUCKET", "bucket_name": "copenhagen" }]
+}
