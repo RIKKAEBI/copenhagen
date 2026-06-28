@@ -66,7 +66,7 @@ export function HangarApp() {
       )}
 
       {/* 予約スケジュール + 車両所在地（横並び）— カレンダーの上 */}
-      <section className="relative z-10 mx-auto grid max-w-7xl gap-4 px-3 pt-4 sm:px-6 lg:grid-cols-2">
+      <section className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 gap-4 px-3 pt-4 sm:px-6 lg:grid-cols-2">
         <ReservationsBoard reservations={reservations} onCancel={cancel} />
         <VehicleLocations reservations={reservations} />
       </section>
