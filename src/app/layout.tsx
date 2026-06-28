@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CAR DEPLOYMENT // 社用車予約システム",
-  description: "コペン・バモスの予約。エースコンバット風の機体選択UIで社用車を予約。",
+  title: "社用車予約",
+  description: "コペン・バモスの社用車予約システム",
 };
 
 export default function RootLayout({
