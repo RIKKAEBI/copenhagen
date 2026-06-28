@@ -142,18 +142,27 @@ function Corners() {
 }
 
 function Clock() {
+  // 日時はクライアント（マウント後）でのみ算出する。
+  // SSR/プリレンダ時の値とクライアントの値がズレてハイドレーションエラーになるのを防ぐ。
   const [now, setNow] = useState<string>("--:--:--");
+  const [date, setDate] = useState<string>("----/--/--");
   useEffect(() => {
-    const tick = () => setNow(new Date().toLocaleTimeString("ja-JP", { hour12: false }));
+    const tick = () => {
+      const d = new Date();
+      setNow(d.toLocaleTimeString("ja-JP", { hour12: false }));
+      setDate(d.toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit", weekday: "short" }));
+    };
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
   return (
     <div className="text-right">
-      <div className="font-mono text-lg tabular-nums tracking-widest text-white/85">{now}</div>
-      <div className="font-mono text-[10px] tracking-[0.2em] text-white/35">
-        {new Date().toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit", weekday: "short" })}
+      <div className="font-mono text-lg tabular-nums tracking-widest text-white/85" suppressHydrationWarning>
+        {now}
+      </div>
+      <div className="font-mono text-[10px] tracking-[0.2em] text-white/35" suppressHydrationWarning>
+        {date}
       </div>
     </div>
   );
