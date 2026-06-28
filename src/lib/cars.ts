@@ -102,10 +102,4 @@ export const CARS: Record<CarId, Car> = {
 export const CAR_LIST: Car[] = [CARS.copen, CARS.vamos];
 
 /** 返却場所の候補（社内拠点） */
-export const RETURN_LOCATIONS = [
-  "本社 第1駐車場",
-  "本社 第2駐車場",
-  "東棟 地下P",
-  "西営業所",
-  "倉庫前スペース",
-] as const;
+export const RETURN_LOCATIONS = ["会社"] as const;

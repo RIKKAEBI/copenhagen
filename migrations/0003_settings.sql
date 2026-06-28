@@ -9,8 +9,4 @@ CREATE TABLE IF NOT EXISTS settings (
 
 -- 既定の返却場所をseed
 INSERT OR IGNORE INTO settings (kind, value) VALUES
-  ('location', '本社 第1駐車場'),
-  ('location', '本社 第2駐車場'),
-  ('location', '東棟 地下P'),
-  ('location', '西営業所'),
-  ('location', '倉庫前スペース');
+  ('location', '会社');
