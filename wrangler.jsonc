@@ -18,7 +18,7 @@
     {
       "binding": "DB",
       "database_name": "copenhagen",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "a27913c6-3c3d-4cca-9506-b949e121570e",
       "migrations_dir": "migrations"
     }
   ]
