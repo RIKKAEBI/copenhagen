@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "社用車予約",
-  description: "コペン・バモスの社用車予約システム",
+  description: "社用車の予約システム",
 };
 
 export default function RootLayout({
