@@ -8,6 +8,7 @@ import { SpecPanel } from "./SpecPanel";
 import { CarSelector } from "./CarSelector";
 import { ReservationForm } from "./ReservationForm";
 import { ReservationsBoard } from "./ReservationsBoard";
+import { ReservationCalendar } from "./ReservationCalendar";
 
 // WebGL は SSR できないのでクライアント専用で読み込む
 const CarShowcase = dynamic(() => import("./CarShowcase"), {
@@ -23,7 +24,13 @@ export function HangarApp() {
   const [selected, setSelected] = useState<CarId>("copen");
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [formOpen, setFormOpen] = useState(false);
+  const [formDate, setFormDate] = useState<Date | undefined>(undefined);
   const [warning, setWarning] = useState<string | null>(null);
+
+  function openForm(date?: Date) {
+    setFormDate(date);
+    setFormOpen(true);
+  }
 
   const car = CARS[selected];
 
@@ -64,6 +71,11 @@ export function HangarApp() {
         </div>
       )}
 
+      {/* トップ: 予約カレンダー */}
+      <section className="relative z-10 mx-auto max-w-7xl px-6 pt-6">
+        <ReservationCalendar reservations={reservations} accent={car.accent} onSelectDate={openForm} />
+      </section>
+
       {/* メイン: 3D ショーケース + スペック */}
       <main className="relative z-10 mx-auto grid max-w-7xl gap-6 px-6 py-6 lg:grid-cols-[1.45fr_1fr]">
         <section className="relative">
@@ -93,7 +105,7 @@ export function HangarApp() {
             <CarSelector selected={selected} onSelect={setSelected} />
             <button
               type="button"
-              onClick={() => setFormOpen(true)}
+              onClick={() => openForm()}
               className="px-6 py-3 text-sm font-bold tracking-[0.25em] text-black transition-all hover:brightness-110"
               style={{ background: car.accent, boxShadow: `0 0 28px -8px ${car.accent}`, clipPath: "polygon(8% 0, 100% 0, 100% 100%, 0 100%)" }}
             >
@@ -115,6 +127,7 @@ export function HangarApp() {
       {formOpen && (
         <ReservationForm
           car={car}
+          initialDate={formDate}
           onClose={() => setFormOpen(false)}
           onCreated={(r) => {
             setReservations((prev) => [...prev, r]);

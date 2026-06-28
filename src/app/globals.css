@@ -53,6 +53,25 @@ body {
   opacity: 0.6;
 }
 
+/* カレンダーのナビボタン */
+.cal-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.9rem;
+  height: 1.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+.cal-nav:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.06);
+}
+
 /* 走査線オーバーレイ */
 .scanlines {
   background-image: repeating-linear-gradient(

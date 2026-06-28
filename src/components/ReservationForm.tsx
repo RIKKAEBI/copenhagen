@@ -4,17 +4,25 @@ import { useState } from "react";
 import { RETURN_LOCATIONS, type Car } from "@/lib/cars";
 import type { Reservation } from "@/lib/types";
 
-/** datetime-local の初期値（次の正時） */
-function defaultStart(): string {
-  const d = new Date();
-  d.setMinutes(0, 0, 0);
-  d.setHours(d.getHours() + 1);
+/** datetime-local の初期値（次の正時、または指定日の 09:00 / 11:00） */
+function defaultStart(base?: Date): string {
+  const d = base ? new Date(base) : new Date();
+  if (base) {
+    d.setHours(9, 0, 0, 0);
+  } else {
+    d.setMinutes(0, 0, 0);
+    d.setHours(d.getHours() + 1);
+  }
   return toLocalInput(d);
 }
-function defaultEnd(): string {
-  const d = new Date();
-  d.setMinutes(0, 0, 0);
-  d.setHours(d.getHours() + 2);
+function defaultEnd(base?: Date): string {
+  const d = base ? new Date(base) : new Date();
+  if (base) {
+    d.setHours(11, 0, 0, 0);
+  } else {
+    d.setMinutes(0, 0, 0);
+    d.setHours(d.getHours() + 2);
+  }
   return toLocalInput(d);
 }
 function toLocalInput(d: Date): string {
@@ -24,16 +32,18 @@ function toLocalInput(d: Date): string {
 
 export function ReservationForm({
   car,
+  initialDate,
   onClose,
   onCreated,
 }: {
   car: Car;
+  initialDate?: Date;
   onClose: () => void;
   onCreated: (r: Reservation) => void;
 }) {
   const [userName, setUserName] = useState("");
-  const [startAt, setStartAt] = useState(defaultStart);
-  const [endAt, setEndAt] = useState(defaultEnd);
+  const [startAt, setStartAt] = useState(() => defaultStart(initialDate));
+  const [endAt, setEndAt] = useState(() => defaultEnd(initialDate));
   const [returnLocation, setReturnLocation] = useState<string>(RETURN_LOCATIONS[0]);
   const [errors, setErrors] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
