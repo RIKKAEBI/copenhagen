@@ -10,9 +10,16 @@
   },
   "observability": {
     "enabled": true
-  }
-  // バインディング例（必要に応じてコメント解除）:
-  // "kv_namespaces": [{ "binding": "MY_KV", "id": "<KV_ID>" }],
-  // "d1_databases": [{ "binding": "DB", "database_name": "copenhagen", "database_id": "<D1_ID>" }],
-  // "r2_buckets": [{ "binding": "BUCKET", "bucket_name": "copenhagen" }]
+  },
+  // 予約データの保存先（Cloudflare D1）。
+  // ローカル開発では `database_id` はダミーで動作する（.wrangler/state にローカル SQLite が作られる）。
+  // 本番デプロイ前に `wrangler d1 create copenhagen` で発行した ID に置き換えること。
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "copenhagen",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ]
 }
