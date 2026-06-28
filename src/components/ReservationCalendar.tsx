@@ -2,14 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { CARS } from "@/lib/cars";
-import type { Reservation } from "@/lib/types";
+import { isAllDay, type Reservation } from "@/lib/types";
+import { hmJst, ymdJst } from "@/lib/datetime";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
 const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
 
-function ymd(d: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
+// 日付キー・時刻はすべて JST
+const ymd = ymdJst;
+const hhmm = hmJst;
 
 function startOfDay(d: Date): Date {
   const x = new Date(d);
@@ -17,19 +18,18 @@ function startOfDay(d: Date): Date {
   return x;
 }
 
-/** 予約が覆う日（YYYY-MM-DD）の集合を返す（複数日にまたがる予約に対応） */
+/** 予約が覆う日（JST の YYYY-MM-DD）の集合を返す（複数日にまたがる予約に対応） */
 function coveredDays(r: Reservation): string[] {
-  const days: string[] = [];
-  const start = startOfDay(new Date(r.startAt));
-  const end = startOfDay(new Date(r.endAt));
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    days.push(ymd(d));
+  const days = new Set<string>();
+  const endKey = ymdJst(new Date(r.endAt));
+  let d = new Date(r.startAt);
+  days.add(ymdJst(d));
+  // 日本は夏時間が無いので 24h 加算で確実に翌 JST 日になる
+  while (ymdJst(d) < endKey) {
+    d = new Date(d.getTime() + 24 * 60 * 60 * 1000);
+    days.add(ymdJst(d));
   }
-  return days;
-}
-
-function hhmm(iso: string): string {
-  return new Date(iso).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+  return [...days];
 }
 
 export function ReservationCalendar({
@@ -87,9 +87,9 @@ export function ReservationCalendar({
   // マウント前（SSR / 初回クライアント描画）は日付に依存しないスケルトンを描く
   if (!cursor) {
     return (
-      <div className="hud-frame p-4">
-        <div className="mb-3 font-mono text-[10px] tracking-[0.3em] text-white/40">RESERVATION CALENDAR</div>
-        <div className="grid h-[420px] place-items-center font-mono text-xs tracking-widest text-white/30">
+      <div className="hud-frame p-3 sm:p-4">
+        <div className="mb-3 font-mono text-[10px] tracking-[0.3em] text-black/40">RESERVATION CALENDAR</div>
+        <div className="grid h-[420px] place-items-center font-mono text-xs tracking-widest text-black/35">
           LOADING CALENDAR...
         </div>
       </div>
@@ -97,39 +97,39 @@ export function ReservationCalendar({
   }
 
   return (
-    <div className="hud-frame p-4">
+    <div className="hud-frame p-3 sm:p-4">
       {/* ヘッダー */}
       <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="font-mono text-[10px] tracking-[0.3em] text-white/40">RESERVATION CALENDAR</span>
+        <span className="hidden font-mono text-[10px] tracking-[0.3em] text-black/40 sm:inline">RESERVATION CALENDAR</span>
+        <div className="ml-auto flex items-center gap-3">
           <h2 className="text-lg font-bold tracking-wide tabular-nums" style={{ color: accent }}>
             {monthLabel}
           </h2>
-        </div>
-        <div className="flex items-center gap-2">
-          <button type="button" onClick={() => shiftMonth(-1)} className="cal-nav" aria-label="前の月">
-            ◀
-          </button>
-          <button
-            type="button"
-            onClick={() => setCursor(startOfDay(new Date()))}
-            className="cal-nav px-3 text-[11px] tracking-widest"
-          >
-            今日
-          </button>
-          <button type="button" onClick={() => shiftMonth(1)} className="cal-nav" aria-label="次の月">
-            ▶
-          </button>
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => shiftMonth(-1)} className="cal-nav" aria-label="前の月">
+              <ChevronLeft size={14} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setCursor(startOfDay(new Date()))}
+              className="cal-nav px-3 text-[11px] tracking-widest"
+            >
+              今日
+            </button>
+            <button type="button" onClick={() => shiftMonth(1)} className="cal-nav" aria-label="次の月">
+              <ChevronRight size={14} />
+            </button>
+          </div>
         </div>
       </div>
 
       {/* 曜日ヘッダー */}
-      <div className="grid grid-cols-7 border-b border-white/10 pb-1">
+      <div className="grid grid-cols-7 border-b border-black/10 pb-1">
         {WEEKDAYS.map((w, i) => (
           <div
             key={w}
             className={`text-center font-mono text-[11px] tracking-widest ${
-              i === 0 ? "text-red-400/70" : i === 6 ? "text-sky-400/70" : "text-white/45"
+              i === 0 ? "text-red-400/70" : i === 6 ? "text-sky-400/70" : "text-black/45"
             }`}
           >
             {w}
@@ -150,43 +150,44 @@ export function ReservationCalendar({
               type="button"
               onClick={() => onSelectDate(d)}
               title="クリックでこの日を予約"
-              className={`group relative flex min-h-[84px] flex-col gap-1 border-b border-r border-white/8 p-1.5 text-left transition-colors hover:bg-white/[0.04] ${
+              className={`group relative flex min-h-[50px] flex-col gap-0.5 border-b border-r border-black/[0.08] p-1 text-left transition-colors hover:bg-black/[0.05] sm:min-h-[60px] ${
                 inMonth ? "" : "opacity-35"
               }`}
+              style={isToday ? { background: `${accent}12` } : undefined}
             >
-              <span
-                className={`font-mono text-[11px] tabular-nums ${
-                  isToday ? "font-bold text-black" : "text-white/55"
-                } ${isToday ? "inline-flex h-5 w-5 items-center justify-center rounded-full" : ""}`}
-                style={isToday ? { background: accent } : undefined}
-              >
-                {d.getDate()}
-              </span>
+              <span className="font-mono text-[11px] tabular-nums text-black/55">{d.getDate()}</span>
 
               <div className="flex flex-col gap-0.5 overflow-hidden">
-                {dayRes.slice(0, 3).map((r) => {
+                {dayRes.slice(0, 2).map((r) => {
                   const car = CARS[r.carId];
                   return (
-                    <span
+                    <div
                       key={r.id}
-                      className="truncate rounded-sm px-1 py-0.5 text-[10px] leading-tight text-white/90"
+                      className="px-1 py-0.5 leading-tight"
                       style={{ background: `${car.accent}26`, borderLeft: `2px solid ${car.accent}` }}
                     >
-                      {hhmm(r.startAt)} {car.name}・{r.userName}
-                    </span>
+                      <div className="truncate text-[10px] text-black/80">
+                        {isAllDay(r) ? "終日" : hhmm(r.startAt)} {car.name}・{r.userName}
+                      </div>
+                      {r.memo && (
+                        <div className="line-clamp-2 whitespace-pre-wrap break-words text-[9px] leading-snug text-black/50">
+                          {r.memo}
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
-                {dayRes.length > 3 && (
-                  <span className="px-1 text-[10px] text-white/45">+{dayRes.length - 3} 件</span>
+                {dayRes.length > 2 && (
+                  <span className="px-1 text-[10px] text-black/45">+{dayRes.length - 2} 件</span>
                 )}
               </div>
 
               {/* ホバー時の + 追加ヒント */}
               <span
-                className="pointer-events-none absolute right-1 top-1 text-[12px] opacity-0 transition-opacity group-hover:opacity-60"
+                className="pointer-events-none absolute right-1 top-1 opacity-0 transition-opacity group-hover:opacity-60"
                 style={{ color: accent }}
               >
-                ＋
+                <Plus size={12} />
               </span>
             </button>
           );

@@ -1,17 +1,15 @@
 "use client";
 
-import { CARS } from "@/lib/cars";
-import type { Reservation } from "@/lib/types";
+import { CAR_LIST } from "@/lib/cars";
+import { isAllDay, type Reservation } from "@/lib/types";
+import { fmtJst } from "@/lib/datetime";
 
 function fmt(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleString("ja-JP", {
-    month: "2-digit",
-    day: "2-digit",
-    weekday: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return fmtJst(iso, { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+}
+
+function dateOnly(iso: string): string {
+  return fmtJst(iso, { month: "2-digit", day: "2-digit" });
 }
 
 function isPast(r: Reservation): boolean {
@@ -25,56 +23,56 @@ export function ReservationsBoard({
   reservations: Reservation[];
   onCancel: (id: number) => void;
 }) {
-  const upcoming = reservations
+  const active = reservations
     .filter((r) => !isPast(r))
     .sort((a, b) => a.startAt.localeCompare(b.startAt));
 
+  const nearestByCar = CAR_LIST.map((car) => ({
+    car,
+    reservation: active.find((r) => r.carId === car.id) ?? null,
+  }));
+
   return (
-    <div className="hud-frame p-4">
-      <div className="mb-3 flex items-center justify-between">
-        <div className="font-mono text-[10px] tracking-[0.3em] text-white/40">RESERVATION SCHEDULE</div>
-        <div className="font-mono text-[10px] text-white/35">{upcoming.length} ACTIVE</div>
+    <div className="hud-frame p-3">
+      <div className="mb-2 flex items-center justify-between">
+        <div className="font-mono text-[10px] tracking-[0.3em] text-black/40">RESERVATION SCHEDULE</div>
+        <div className="font-mono text-[10px] text-black/40">{active.length} ACTIVE</div>
       </div>
 
-      {upcoming.length === 0 ? (
-        <p className="py-6 text-center text-sm text-white/35">現在、有効な予約はありません。</p>
-      ) : (
-        <ul className="space-y-2">
-          {upcoming.map((r) => {
-            const car = CARS[r.carId];
-            return (
-              <li
-                key={r.id}
-                className="flex items-center gap-3 border-l-2 bg-white/[0.02] p-3"
-                style={{ borderColor: car.accent }}
-              >
-                <div className="flex w-16 shrink-0 flex-col items-center">
-                  <span className="text-sm font-bold" style={{ color: car.accent }}>
-                    {car.name}
-                  </span>
-                  <span className="font-mono text-[9px] text-white/35">{car.code}</span>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="font-mono text-[13px] text-white/85">
-                    {fmt(r.startAt)} <span className="text-white/30">→</span> {fmt(r.endAt)}
-                  </div>
-                  <div className="mt-0.5 flex flex-wrap gap-x-3 text-[12px] text-white/50">
-                    <span>👤 {r.userName}</span>
-                    <span>📍 {r.returnLocation}</span>
-                  </div>
+      <ul className="space-y-1.5">
+        {nearestByCar.map(({ car, reservation: r }) => (
+          <li
+            key={car.id}
+            className="flex items-center gap-2 border-l-2 bg-black/[0.03] px-2.5 py-1.5"
+            style={{ borderColor: car.accent }}
+          >
+            <span className="w-12 shrink-0 text-sm font-bold" style={{ color: car.accent }}>
+              {car.name}
+            </span>
+            {r ? (
+              <>
+                <div className="min-w-0 flex-1 truncate font-mono text-[12px] text-black/75">
+                  {isAllDay(r) ? (
+                    <>{dateOnly(r.startAt)} 終日</>
+                  ) : (
+                    <>{fmt(r.startAt)} <span className="text-black/35">→</span> {fmt(r.endAt)}</>
+                  )}
+                  <span className="text-black/45"> ・ {r.userName} ・ {r.returnLocation}</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => onCancel(r.id)}
-                  className="shrink-0 rounded border border-white/12 px-2 py-1 text-[11px] text-white/50 transition-colors hover:border-red-400/50 hover:text-red-300"
+                  className="shrink-0 rounded border border-black/15 px-2 py-0.5 text-[11px] text-black/50 transition-colors hover:border-red-400/50 hover:text-red-600"
                 >
                   取消
                 </button>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+              </>
+            ) : (
+              <div className="flex-1 text-[12px] text-black/40">直近の予約はありません</div>
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

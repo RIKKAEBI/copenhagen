@@ -1,6 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { CARS, RETURN_LOCATIONS, type CarId } from "@/lib/cars";
+import { CARS, type CarId } from "@/lib/cars";
 import { rowToReservation, type ReservationRow } from "@/lib/types";
+import { logActivity } from "@/lib/activity";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "JSON ボディが不正です。" }, { status: 400 });
   }
 
-  const { userName, carId, startAt, endAt, returnLocation } = (body ?? {}) as Record<string, string>;
+  const { userName, carId, startAt, endAt, returnLocation, memo } = (body ?? {}) as Record<string, string>;
 
   // バリデーション
   const errors: string[] = [];
@@ -51,8 +52,7 @@ export async function POST(request: Request) {
   if (!endAt || Number.isNaN(Date.parse(endAt))) errors.push("返却日時が不正です。");
   if (startAt && endAt && Date.parse(endAt) <= Date.parse(startAt))
     errors.push("返却日時は利用開始日時より後にしてください。");
-  if (!returnLocation || !RETURN_LOCATIONS.includes(returnLocation as (typeof RETURN_LOCATIONS)[number]))
-    errors.push("返却場所を選択してください。");
+  if (!returnLocation?.trim()) errors.push("返却場所を選択してください。");
   if (errors.length) return Response.json({ errors }, { status: 400 });
 
   // 同じ車の時間帯重複チェック
@@ -72,12 +72,21 @@ export async function POST(request: Request) {
 
   const inserted = await db
     .prepare(
-      `INSERT INTO reservations (user_name, car_id, start_at, end_at, return_location)
-       VALUES (?1, ?2, ?3, ?4, ?5)
+      `INSERT INTO reservations (user_name, car_id, start_at, end_at, return_location, memo)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6)
        RETURNING *`,
     )
-    .bind(userName.trim(), carId, startAt, endAt, returnLocation)
+    .bind(userName.trim(), carId, startAt, endAt, returnLocation, (memo ?? "").trim())
     .first<ReservationRow>();
+
+  await logActivity(db, {
+    action: "create",
+    carId: carId as CarId,
+    userName: userName.trim(),
+    startAt,
+    endAt,
+    returnLocation,
+  });
 
   return Response.json({ reservation: inserted ? rowToReservation(inserted) : null }, { status: 201 });
 }
