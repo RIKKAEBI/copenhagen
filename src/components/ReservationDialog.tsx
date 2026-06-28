@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CARS, type CarId } from "@/lib/cars";
 import { isAllDay, type Reservation } from "@/lib/types";
 import { combineJst, fmtJst, hmJst, ymdJst } from "@/lib/datetime";
@@ -65,6 +65,15 @@ export function ReservationDialog({
   const [editingId, setEditingId] = useState<number | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+
+  // ダイアログ表示中は背景（body）のスクロールをロックする
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
 
   const baseDate = date ?? new Date();
   // 選択日の JST 日付キー（カレンダーと同じ基準）。これを予約の日付に使う。
