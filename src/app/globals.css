@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #05070d;
-  --foreground: #e7ecf3;
+  --background: #eef1f6;
+  --foreground: #16202b;
 }
 
 @theme inline {
@@ -13,8 +13,8 @@
 html,
 body {
   background:
-    radial-gradient(1200px 600px at 70% -10%, rgba(61, 169, 255, 0.08), transparent 60%),
-    radial-gradient(900px 500px at 10% 110%, rgba(255, 106, 61, 0.06), transparent 60%),
+    radial-gradient(1200px 600px at 70% -10%, rgba(61, 169, 255, 0.1), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(255, 106, 61, 0.08), transparent 60%),
     var(--background);
   color: var(--foreground);
   font-family:
@@ -26,31 +26,28 @@ body {
 /* HUD パネルの枠（切り欠き付き） */
 .hud-frame {
   position: relative;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 2px rgba(16, 32, 48, 0.04);
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
 }
 
 /* HUD 風の入力欄 */
 .hud-input {
   width: 100%;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
   padding: 0.55rem 0.75rem;
   font-size: 14px;
-  color: #e7ecf3;
+  color: #16202b;
   outline: none;
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease;
 }
 .hud-input:focus {
-  border-color: rgba(159, 216, 255, 0.7);
-  box-shadow: 0 0 0 1px rgba(159, 216, 255, 0.4);
-}
-.hud-input::-webkit-calendar-picker-indicator {
-  filter: invert(1);
-  opacity: 0.6;
+  border-color: rgba(61, 169, 255, 0.8);
+  box-shadow: 0 0 0 1px rgba(61, 169, 255, 0.35);
 }
 
 /* カレンダーのナビボタン */
@@ -60,26 +57,26 @@ body {
   justify-content: center;
   min-width: 1.9rem;
   height: 1.9rem;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  color: rgba(0, 0, 0, 0.7);
   font-size: 12px;
   transition:
     border-color 0.15s ease,
     background 0.15s ease;
 }
 .cal-nav:hover {
-  border-color: rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.05);
 }
 
-/* 走査線オーバーレイ */
+/* 走査線オーバーレイ（白ベースでは極薄） */
 .scanlines {
   background-image: repeating-linear-gradient(
     to bottom,
-    rgba(255, 255, 255, 0.025) 0px,
-    rgba(255, 255, 255, 0.025) 1px,
+    rgba(0, 0, 0, 0.018) 0px,
+    rgba(0, 0, 0, 0.018) 1px,
     transparent 1px,
     transparent 3px
   );
-  mix-blend-mode: overlay;
+  mix-blend-mode: multiply;
 }
