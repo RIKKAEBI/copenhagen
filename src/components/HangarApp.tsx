@@ -66,23 +66,23 @@ export function HangarApp() {
       )}
 
       {/* 予約スケジュール + 車両所在地（横並び）— カレンダーの上 */}
-      <section className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 gap-4 px-3 pt-4 sm:px-6 lg:grid-cols-2">
+      <section className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 gap-3 px-3 pt-3 sm:px-6 lg:grid-cols-2">
         <ReservationsBoard reservations={reservations} onCancel={cancel} />
         <VehicleLocations reservations={reservations} />
       </section>
 
       {/* 予約カレンダー */}
-      <section className="relative z-10 mx-auto max-w-7xl px-3 py-4 sm:px-6">
+      <section className="relative z-10 mx-auto max-w-7xl px-3 pt-3 sm:px-6">
         <ReservationCalendar reservations={reservations} accent={car.accent} onSelectDate={openDialog} />
       </section>
 
       {/* 設定（ユーザー名・返却場所） */}
-      <section className="relative z-10 mx-auto max-w-7xl px-3 py-4 sm:px-6">
+      <section className="relative z-10 mx-auto max-w-7xl px-3 pt-3 sm:px-6">
         <SettingsPanel onChanged={refreshSettings} refreshKey={activityVersion} />
       </section>
 
       {/* アクティビティログ（全DB操作） */}
-      <section className="relative z-10 mx-auto max-w-7xl px-3 pb-8 sm:px-6">
+      <section className="relative z-10 mx-auto max-w-7xl px-3 pt-3 pb-6 sm:px-6">
         <ActivityLog refreshKey={activityVersion} />
       </section>
 
