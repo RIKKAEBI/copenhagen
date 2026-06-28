@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CARS } from "@/lib/cars";
 import type { Reservation } from "@/lib/types";
 
@@ -41,8 +41,15 @@ export function ReservationCalendar({
   accent: string;
   onSelectDate: (date: Date) => void;
 }) {
-  const [cursor, setCursor] = useState(() => startOfDay(new Date()));
-  const todayKey = ymd(new Date());
+  // 「現在日時」依存の描画はマウント後にだけ行う（SSR/プリレンダ時の日付と
+  // クライアントの日付がズレてハイドレーション不一致になるのを防ぐ）。
+  const [cursor, setCursor] = useState<Date | null>(null);
+  const [todayKey, setTodayKey] = useState<string>("");
+  useEffect(() => {
+    const now = new Date();
+    setCursor(new Date(now.getFullYear(), now.getMonth(), 1));
+    setTodayKey(ymd(now));
+  }, []);
 
   // 日付キー → その日の予約一覧
   const byDay = useMemo(() => {
@@ -60,6 +67,7 @@ export function ReservationCalendar({
 
   // 月グリッド（日曜始まり、6週ぶん）
   const cells = useMemo(() => {
+    if (!cursor) return [];
     const first = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
     const gridStart = new Date(first);
     gridStart.setDate(1 - first.getDay());
@@ -70,10 +78,22 @@ export function ReservationCalendar({
     });
   }, [cursor]);
 
-  const monthLabel = cursor.toLocaleDateString("ja-JP", { year: "numeric", month: "long" });
+  const monthLabel = cursor ? cursor.toLocaleDateString("ja-JP", { year: "numeric", month: "long" }) : "";
 
   function shiftMonth(delta: number) {
-    setCursor((c) => new Date(c.getFullYear(), c.getMonth() + delta, 1));
+    setCursor((c) => (c ? new Date(c.getFullYear(), c.getMonth() + delta, 1) : c));
+  }
+
+  // マウント前（SSR / 初回クライアント描画）は日付に依存しないスケルトンを描く
+  if (!cursor) {
+    return (
+      <div className="hud-frame p-4">
+        <div className="mb-3 font-mono text-[10px] tracking-[0.3em] text-white/40">RESERVATION CALENDAR</div>
+        <div className="grid h-[420px] place-items-center font-mono text-xs tracking-widest text-white/30">
+          LOADING CALENDAR...
+        </div>
+      </div>
+    );
   }
 
   return (
